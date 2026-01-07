@@ -1,16 +1,51 @@
-import { Link } from "react-router-dom";
-import { ArrowLeft, Search, MapPin, Star } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Search, MapPin, Star, LogOut, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 const Student = () => {
+  const { user, role, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    } else if (!loading && user && role && role !== 'student') {
+      navigate('/owner');
+    }
+  }, [user, role, loading, navigate]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       {/* Header */}
       <header className="w-full py-6 px-8 border-b border-border/50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft size={20} />
+          <Link to="/" className="flex items-center gap-3">
             <span className="text-2xl font-bold text-gradient">Linkmate</span>
           </Link>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground hidden sm:block">
+              {user?.email}
+            </span>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut size={18} className="mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 

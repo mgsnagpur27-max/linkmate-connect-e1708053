@@ -1,13 +1,30 @@
+import { Link } from "react-router-dom";
 import RoleCard from "@/components/RoleCard";
-import { GraduationCap, Home } from "lucide-react";
+import { GraduationCap, Home, LogIn } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const { user, role } = useAuth();
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="w-full py-6 px-8 animate-fade-in">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gradient">Linkmate</h1>
+          {user ? (
+            <Link to={role === 'student' ? '/student' : '/owner'}>
+              <Button variant="outline">Go to Dashboard</Button>
+            </Link>
+          ) : (
+            <Link to="/auth">
+              <Button variant="outline">
+                <LogIn size={18} className="mr-2" />
+                Sign In
+              </Button>
+            </Link>
+          )}
         </div>
       </header>
 
