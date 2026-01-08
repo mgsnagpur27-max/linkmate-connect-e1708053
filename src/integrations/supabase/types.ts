@@ -14,16 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rooms: {
+        Row: {
+          contact_number: string
+          created_at: string
+          id: string
+          images: string[] | null
+          is_active: boolean
+          location: string
+          owner_id: string
+          price: number
+          property_type: Database["public"]["Enums"]["property_type"]
+          tenant_preference: Database["public"]["Enums"]["tenant_preference"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          contact_number: string
+          created_at?: string
+          id?: string
+          images?: string[] | null
+          is_active?: boolean
+          location: string
+          owner_id: string
+          price: number
+          property_type: Database["public"]["Enums"]["property_type"]
+          tenant_preference?: Database["public"]["Enums"]["tenant_preference"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          contact_number?: string
+          created_at?: string
+          id?: string
+          images?: string[] | null
+          is_active?: boolean
+          location?: string
+          owner_id?: string
+          price?: number
+          property_type?: Database["public"]["Enums"]["property_type"]
+          tenant_preference?: Database["public"]["Enums"]["tenant_preference"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "student" | "owner"
+      property_type: "1 BHK" | "2 BHK" | "3 BHK" | "1 Bed" | "2 Bed"
+      tenant_preference: "Bachelor" | "Family" | "Girls" | "Working" | "Any"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +248,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["student", "owner"],
+      property_type: ["1 BHK", "2 BHK", "3 BHK", "1 Bed", "2 Bed"],
+      tenant_preference: ["Bachelor", "Family", "Girls", "Working", "Any"],
+    },
   },
 } as const

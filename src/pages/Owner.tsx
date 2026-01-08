@@ -1,80 +1,133 @@
-import { Link } from "react-router-dom";
-import { ArrowLeft, Home, Camera, Users, TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Home, Plus, List, Loader2 } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { AddRoomForm } from "@/components/AddRoomForm";
+import { OwnerRoomCard } from "@/components/OwnerRoomCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/useAuth";
+import { useOwnerRooms } from "@/hooks/useRooms";
 
 const Owner = () => {
+  const navigate = useNavigate();
+  const { user, role, loading, isAuthenticated } = useAuth();
+  const { data: rooms, isLoading: roomsLoading } = useOwnerRooms(user?.id);
+  const [activeTab, setActiveTab] = useState("add");
+
+  useEffect(() => {
+    if (!loading && (!isAuthenticated || role !== "owner")) {
+      navigate("/auth");
+    }
+  }, [loading, isAuthenticated, role, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || role !== "owner") {
+    return null;
+  }
+
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="w-full py-6 px-8 border-b border-border/50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft size={20} />
-            <span className="text-2xl font-bold text-gradient">Linkmate</span>
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-12">
+      <main className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
         {/* Hero Section */}
-        <div className="text-center mb-16 animate-fade-up">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-gradient-owner">
-            <Home size={28} className="text-primary-foreground" />
+        <div className="text-center mb-8 md:mb-12 animate-fade-up">
+          <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 mb-4 md:mb-6 rounded-2xl bg-gradient-owner">
+            <Home size={24} className="text-primary-foreground md:hidden" />
+            <Home size={28} className="text-primary-foreground hidden md:block" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            List Your Property
+          <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-3 md:mb-4">
+            Manage Your Properties
           </h1>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Reach thousands of verified students looking for accommodation near their campus.
+          <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto px-4">
+            List new rooms or manage your existing properties all in one place.
           </p>
         </div>
 
-        {/* Benefits */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-          {[
-            {
-              icon: <Camera size={24} />,
-              title: "Easy Listing",
-              description: "Upload photos and details in minutes with our simple listing process.",
-            },
-            {
-              icon: <Users size={24} />,
-              title: "Verified Students",
-              description: "Connect only with verified students from recognized institutions.",
-            },
-            {
-              icon: <TrendingUp size={24} />,
-              title: "Maximum Visibility",
-              description: "Your listing reaches students actively searching in your area.",
-            },
-          ].map((benefit, i) => (
-            <div
-              key={i}
-              className="p-6 bg-card rounded-xl shadow-card border border-border/50 hover:shadow-card-hover transition-all duration-300"
-            >
-              <div className="w-12 h-12 mb-4 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
-                {benefit.icon}
+        {/* Tabs */}
+        <div className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="add" className="gap-2">
+                <Plus size={16} />
+                Add Room
+              </TabsTrigger>
+              <TabsTrigger value="listings" className="gap-2">
+                <List size={16} />
+                My Listings
+                {rooms && rooms.length > 0 && (
+                  <span className="ml-1 bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">
+                    {rooms.length}
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="add">
+              <div className="bg-card rounded-xl p-6 md:p-8 shadow-card border border-border/50">
+                <h2 className="text-xl font-semibold text-foreground mb-6">
+                  Add New Property
+                </h2>
+                <AddRoomForm
+                  userId={user!.id}
+                  onSuccess={() => setActiveTab("listings")}
+                />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">{benefit.title}</h3>
-              <p className="text-muted-foreground">{benefit.description}</p>
-            </div>
-          ))}
-        </div>
+            </TabsContent>
 
-        {/* CTA Section */}
-        <div
-          className="bg-card rounded-2xl p-8 md:p-12 shadow-card border border-border/50 text-center animate-fade-up"
-          style={{ animationDelay: "0.2s" }}
-        >
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-            Ready to List Your Property?
-          </h2>
-          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Join hundreds of property owners who have successfully found tenants through Linkmate.
-          </p>
-          <button className="px-8 py-3.5 rounded-xl bg-gradient-owner text-primary-foreground font-semibold transition-all hover:opacity-90 hover:shadow-lg hover:scale-105">
-            Create Your Listing
-          </button>
+            <TabsContent value="listings">
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-foreground mb-4">
+                  Your Listings
+                </h2>
+
+                {roomsLoading ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="bg-card rounded-xl p-4 shadow-card border border-border/50 flex gap-4">
+                        <Skeleton className="w-48 h-32" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-5 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                          <Skeleton className="h-6 w-24" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : rooms && rooms.length > 0 ? (
+                  <div className="space-y-4">
+                    {rooms.map((room) => (
+                      <OwnerRoomCard key={room.id} room={room} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-card rounded-xl shadow-card border border-border/50">
+                    <Home size={48} className="mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium text-foreground mb-2">
+                      No listings yet
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Add your first property to start receiving inquiries.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab("add")}
+                      className="text-primary hover:underline"
+                    >
+                      Add your first room →
+                    </button>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>
