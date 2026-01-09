@@ -80,6 +80,45 @@ export type Database = {
         }
         Relationships: []
       }
+      student_applications: {
+        Row: {
+          budget: number
+          created_at: string
+          email: string
+          id: string
+          move_in_date: string
+          name: string
+          phone: string
+          preferred_location: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          budget: number
+          created_at?: string
+          email: string
+          id?: string
+          move_in_date: string
+          name: string
+          phone: string
+          preferred_location: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          budget?: number
+          created_at?: string
+          email?: string
+          id?: string
+          move_in_date?: string
+          name?: string
+          phone?: string
+          preferred_location?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
