@@ -1,8 +1,12 @@
 import { useState } from "react";
-import { MapPin, Phone, Home, Users } from "lucide-react";
+import { MapPin, Home, Users, Heart, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Database } from "@/integrations/supabase/types";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
 
@@ -11,7 +15,13 @@ interface RoomCardProps {
 }
 
 export function RoomCard({ room }: RoomCardProps) {
-  const [showContact, setShowContact] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const { toast } = useToast();
+  const { user } = useAuth();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -23,6 +33,59 @@ export function RoomCard({ room }: RoomCardProps) {
 
   const defaultImage = "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800";
   const imageUrl = room.images && room.images.length > 0 ? room.images[0] : defaultImage;
+
+  const handleSubmitInterest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!name.trim() || !phone.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in your name and phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!/^[+]?[\d\s-]{10,15}$/.test(phone)) {
+      toast({
+        title: "Invalid Phone",
+        description: "Please enter a valid phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase.from("student_applications").insert({
+        user_id: user?.id || null,
+        name: name.trim(),
+        phone: phone.trim(),
+        email: user?.email || `${phone.replace(/\D/g, '')}@placeholder.com`,
+        preferred_location: room.location,
+        budget: room.price,
+        move_in_date: new Date().toISOString().split("T")[0],
+      });
+
+      if (error) throw error;
+
+      setSubmitted(true);
+      toast({
+        title: "Interest Submitted!",
+        description: "The owner will contact you soon.",
+      });
+    } catch (error: any) {
+      console.error("Error submitting interest:", error);
+      toast({
+        title: "Submission Failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="bg-card rounded-xl overflow-hidden shadow-card border border-border/50 hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 flex flex-col">
@@ -61,29 +124,52 @@ export function RoomCard({ room }: RoomCardProps) {
           </div>
         </div>
 
-        <div className="mt-auto flex items-center justify-between pt-3 border-t border-border/50">
-          <p className="font-bold text-lg text-primary">
+        <div className="mt-auto pt-3 border-t border-border/50">
+          <p className="font-bold text-lg text-primary mb-3">
             {formatPrice(room.price)}
             <span className="text-sm font-normal text-muted-foreground">/mo</span>
           </p>
 
-          {showContact ? (
-            <a
-              href={`tel:${room.contact_number}`}
-              className="flex items-center gap-1.5 text-sm font-medium text-secondary hover:text-secondary/80 transition-colors"
-            >
-              <Phone size={14} />
-              {room.contact_number}
-            </a>
+          {submitted ? (
+            <div className="flex items-center justify-center gap-2 py-2 text-sm text-secondary font-medium">
+              <Check size={16} />
+              Interest Submitted!
+            </div>
+          ) : showForm ? (
+            <form onSubmit={handleSubmitInterest} className="space-y-2">
+              <Input
+                placeholder="Your Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-9 text-sm"
+              />
+              <Input
+                placeholder="Phone Number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="h-9 text-sm"
+              />
+              <Button
+                type="submit"
+                size="sm"
+                className="w-full bg-gradient-student text-primary-foreground"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  "Submit Interest"
+                )}
+              </Button>
+            </form>
           ) : (
             <Button
               size="sm"
-              variant="outline"
-              onClick={() => setShowContact(true)}
-              className="text-sm"
+              className="w-full bg-gradient-student text-primary-foreground"
+              onClick={() => setShowForm(true)}
             >
-              <Phone size={14} className="mr-1.5" />
-              Contact
+              <Heart size={14} className="mr-1.5" />
+              I'm Interested
             </Button>
           )}
         </div>
