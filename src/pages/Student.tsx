@@ -1,16 +1,20 @@
 import { useState, useMemo } from "react";
-import { Search, Home } from "lucide-react";
+import { Search, Home, ClipboardList } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { RoomCard } from "@/components/RoomCard";
 import { RoomCardSkeleton } from "@/components/RoomCardSkeleton";
 import { RoomFilters } from "@/components/RoomFilters";
+import { StudentApplicationForm } from "@/components/StudentApplicationForm";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useRooms, RoomFilters as RoomFiltersType } from "@/hooks/useRooms";
 import { Database } from "@/integrations/supabase/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type PropertyType = Database["public"]["Enums"]["property_type"];
 type TenantPreference = Database["public"]["Enums"]["tenant_preference"];
 
-const Student = () => {
+const StudentContent = () => {
   const [location, setLocation] = useState("");
   const [priceRange, setPriceRange] = useState("all");
   const [propertyType, setPropertyType] = useState<PropertyType | "all">("all");
@@ -42,10 +46,10 @@ const Student = () => {
   const { data: rooms, isLoading, error } = useRooms(filters);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-8 md:py-12">
         {/* Hero Section */}
         <div className="text-center mb-8 md:mb-12 animate-fade-up">
           <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 mb-4 md:mb-6 rounded-2xl bg-gradient-student">
@@ -60,56 +64,87 @@ const Student = () => {
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
-          <RoomFilters
-            location={location}
-            onLocationChange={setLocation}
-            priceRange={priceRange}
-            onPriceRangeChange={setPriceRange}
-            propertyType={propertyType}
-            onPropertyTypeChange={setPropertyType}
-            tenantPreference={tenantPreference}
-            onTenantPreferenceChange={setTenantPreference}
-          />
-        </div>
+        <Tabs defaultValue="browse" className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+            <TabsTrigger value="browse" className="gap-2">
+              <Search size={16} />
+              Browse Rooms
+            </TabsTrigger>
+            <TabsTrigger value="apply" className="gap-2">
+              <ClipboardList size={16} />
+              Submit Requirements
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Results */}
-        <div className="animate-fade-up" style={{ animationDelay: "0.2s" }}>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg md:text-xl font-semibold text-foreground">
-              {isLoading ? "Loading..." : `${rooms?.length || 0} Rooms Found`}
-            </h2>
-          </div>
+          <TabsContent value="browse">
+            {/* Filters */}
+            <div className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
+              <RoomFilters
+                location={location}
+                onLocationChange={setLocation}
+                priceRange={priceRange}
+                onPriceRangeChange={setPriceRange}
+                propertyType={propertyType}
+                onPropertyTypeChange={setPropertyType}
+                tenantPreference={tenantPreference}
+                onTenantPreferenceChange={setTenantPreference}
+              />
+            </div>
 
-          {error ? (
-            <div className="text-center py-12">
-              <p className="text-destructive">Failed to load rooms. Please try again.</p>
+            {/* Results */}
+            <div className="animate-fade-up" style={{ animationDelay: "0.2s" }}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg md:text-xl font-semibold text-foreground">
+                  {isLoading ? "Loading..." : `${rooms?.length || 0} Rooms Found`}
+                </h2>
+              </div>
+
+              {error ? (
+                <div className="text-center py-12">
+                  <p className="text-destructive">Failed to load rooms. Please try again.</p>
+                </div>
+              ) : isLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <RoomCardSkeleton key={i} />
+                  ))}
+                </div>
+              ) : rooms && rooms.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                  {rooms.map((room) => (
+                    <RoomCard key={room.id} room={room} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Home size={48} className="mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">No rooms found</h3>
+                  <p className="text-muted-foreground">
+                    Try adjusting your filters to see more results.
+                  </p>
+                </div>
+              )}
             </div>
-          ) : isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {[...Array(6)].map((_, i) => (
-                <RoomCardSkeleton key={i} />
-              ))}
+          </TabsContent>
+
+          <TabsContent value="apply">
+            <div className="animate-fade-up py-4">
+              <StudentApplicationForm />
             </div>
-          ) : rooms && rooms.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {rooms.map((room) => (
-                <RoomCard key={room.id} room={room} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <Home size={48} className="mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">No rooms found</h3>
-              <p className="text-muted-foreground">
-                Try adjusting your filters to see more results.
-              </p>
-            </div>
-          )}
-        </div>
+          </TabsContent>
+        </Tabs>
       </main>
+
+      <Footer />
     </div>
+  );
+};
+
+const Student = () => {
+  return (
+    <ProtectedRoute requiredRole="student">
+      <StudentContent />
+    </ProtectedRoute>
   );
 };
 

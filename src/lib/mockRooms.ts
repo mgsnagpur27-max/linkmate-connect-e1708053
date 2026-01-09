@@ -2,6 +2,9 @@ import { Database } from "@/integrations/supabase/types";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
 
+// Placeholder image for fallback
+const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800";
+
 export const mockRooms: Omit<Room, "owner_id">[] = [
   {
     id: "mock-1",
@@ -91,8 +94,7 @@ export const mockRooms: Omit<Room, "owner_id">[] = [
     tenant_preference: "Bachelor",
     contact_number: "+91 98765 43215",
     images: [
-      "https://images.unsplash.com/photo-1598928506311-c55ez2-d-a2eb?w=800",
-      "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800"
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800"
     ],
     is_active: true,
     created_at: new Date().toISOString(),
@@ -160,4 +162,81 @@ export const mockRooms: Omit<Room, "owner_id">[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
+  {
+    id: "mock-11",
+    title: "Luxury 2 BHK with Terrace",
+    location: "Bandra West, Mumbai",
+    price: 28000,
+    property_type: "2 BHK",
+    tenant_preference: "Family",
+    contact_number: "+91 98765 43220",
+    images: [
+      "https://images.unsplash.com/photo-1560184897-ae75f418493e?w=800"
+    ],
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "mock-12",
+    title: "Compact Studio Near University",
+    location: "Anna Nagar, Chennai",
+    price: 6500,
+    property_type: "1 Bed",
+    tenant_preference: "Bachelor",
+    contact_number: "+91 98765 43221",
+    images: [
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800"
+    ],
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "mock-13",
+    title: "Modern 1 BHK in IT Hub",
+    location: "Hinjewadi, Pune",
+    price: 14000,
+    property_type: "1 BHK",
+    tenant_preference: "Working",
+    contact_number: "+91 98765 43222",
+    images: [
+      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800"
+    ],
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "mock-14",
+    title: "Cozy 2 Bed Near Medical College",
+    location: "Vellore, Tamil Nadu",
+    price: 8500,
+    property_type: "2 Bed",
+    tenant_preference: "Any",
+    contact_number: "+91 98765 43223",
+    images: [
+      "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=800"
+    ],
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "mock-15",
+    title: "Premium 3 BHK Gated Community",
+    location: "Electronic City, Bangalore",
+    price: 32000,
+    property_type: "3 BHK",
+    tenant_preference: "Family",
+    contact_number: "+91 98765 43224",
+    images: [
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800"
+    ],
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
 ];
+
+export const PLACEHOLDER_IMAGE_URL = PLACEHOLDER_IMAGE;
